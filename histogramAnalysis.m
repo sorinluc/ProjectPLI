@@ -1,14 +1,14 @@
 function [ ] = histogramAnalysis( image )
 %HISTOGRAMANALYSIS Summary of this function goes here
 %   Detailed explanation goes here
-    [rows, columns, numberOfColorChannels] = size(image);
+    [~, ~, numberOfColorChannels] = size(image);
     
     if numberOfColorChannels > 1
         image = rgb2gray(image);
     end
+    [counts,~] = imhist(image);
     
-    imhist(image);
-    
-    return;
+    [peaks,locs] = findpeaks(counts, 'MinPeakProminence', 500);
+    peaks
 end
 
