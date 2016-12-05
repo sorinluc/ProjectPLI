@@ -1,4 +1,4 @@
-raw_img = imread('blah.jpg');
+raw_img = imread('tete2.jpg');
 img = im2double(raw_img);
 %imshow(img);
 % Do gamma-corretion.
@@ -62,25 +62,29 @@ labeledImage(labeledImage<=1) = 0;
 imshow(labeledImage);  
 
 stats = regionprops(labeledImage,'Centroid',...
-    'MajorAxisLength','MinorAxisLength','Orientation')
+    'MajorAxisLength','MinorAxisLength','Orientation','PixelList','Perimeter');
 
 nbRegion = size(stats,1);
+eyeRegions=[];
 
 nbEyeRegionPair=0;
 
 for i=1:nbRegion
-    for j=1:nbRegion
+    for j=i:nbRegion
         if (i~=j) && (isEyeRegionPair(stats(i), stats(j)))
             nbEyeRegionPair = nbEyeRegionPair+1;
             if nbEyeRegionPair == 1
                 eyeRegions = [stats(i),stats(j)];
             else
-                eyeRegions(nbEyeRegionPair,1) = stats(i); % Consider pre-allocation
-                eyeRegions(nbEyeRegionPair,2) = stats(j);
+                eyeRegions = [eyeRegions,stats(i),stats(j)]; % Consider pre-allocation
             end
         end
     end
 end
 
-eyeRegions
-            
+imshow(raw_img);
+for i=1:nbEyeRegionPair*2
+    hold on; % Prevent image from being blown away.
+    plot(eyeRegions(i).Centroid(1),eyeRegions(i).Centroid(2),'r+', 'MarkerSize', 5);
+end
+       
