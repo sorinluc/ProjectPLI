@@ -41,22 +41,46 @@ bin_img = zeros(rows, cols);
 
 [~,bin_img] = generate_skinmap('tete2.jpg');
 
-L = bwlabel(bin_img, 4);
+reverseIm = bin_img;
 
-reverseL = L;
-
-rows = size(L, 1);
-cols = size(L, 2);
+rows = size(bin_img, 1);
+cols = size(bin_img, 2);
 
 for i = 1:rows
     for j = 1:cols
-        if L(i,j) == 0
-            reverseL(i,j) = 1;
+        if bin_img(i,j) == 0
+            reverseIm(i,j) = 1;
         else
-            reverseL(i,j) = 0;
+            reverseIm(i,j) = 0;
         end
     end
 end
 
-imshow(reverseL)
+labeledImage = bwlabel(reverseIm, 8);
 
+labeledImage(labeledImage<=1) = 0;
+imshow(labeledImage);  
+
+stats = regionprops(labeledImage,'Centroid',...
+    'MajorAxisLength','MinorAxisLength','Orientation')
+
+nbRegion = size(stats,1);
+
+nbEyeRegionPair=0;
+
+for i=1:nbRegion
+    for j=1:nbRegion
+        if (i~=j) && (isEyeRegionPair(stats(i), stats(j)))
+            nbEyeRegionPair = nbEyeRegionPair+1;
+            if nbEyeRegionPair == 1
+                eyeRegions = [stats(i),stats(j)];
+            else
+                eyeRegions(nbEyeRegionPair,1) = stats(i); % Consider pre-allocation
+                eyeRegions(nbEyeRegionPair,2) = stats(j);
+            end
+        end
+    end
+end
+
+eyeRegions
+            
