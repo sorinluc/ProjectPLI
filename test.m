@@ -1,4 +1,6 @@
-raw_img = imread('tete2.jpg');
+filepath = 'img/tete5.jpg'
+
+raw_img = imread(filepath);
 img = im2double(raw_img);
 %imshow(img);
 % Do gamma-corretion.
@@ -6,27 +8,27 @@ img = im2double(raw_img);
 
 
 % Convert to TSL.
-R = img(:, :, 1);
-G = img(:, :, 2);
-B = img(:, :, 3);
+%R = img(:, :, 1);
+%G = img(:, :, 2);
+%B = img(:, :, 3);
 
 
-nr = R./sqrt(R.^2 + G.^2 + B.^2);
-ng = G./sqrt(R.^2 + G.^2 + B.^2);
-nb = B./sqrt(R.^2 + G.^2 + B.^2);
+%nr = R./sqrt(R.^2 + G.^2 + B.^2);
+%ng = G./sqrt(R.^2 + G.^2 + B.^2);
+%nb = B./sqrt(R.^2 + G.^2 + B.^2);
 
 
-fimg = cat(3,nr,ng,nb);
+%fimg = cat(3,nr,ng,nb);
 
 %imshowpair(img, fimg, 'montage');
 
 
-rows = size(fimg, 1);
-cols = size(fimg, 2);
+%rows = size(fimg, 1);
+%cols = size(fimg, 2);
 
 
-cov = [1,0,0;0,1,0;0,0,1];
-bin_img = zeros(rows, cols);
+%cov = [1,0,0;0,1,0;0,0,1];
+%bin_img = zeros(rows, cols);
 
 
 %for i = 1:rows
@@ -39,7 +41,7 @@ bin_img = zeros(rows, cols);
  %   end
 %end
 
-[~,bin_img] = generate_skinmap('tete2.jpg');
+[~,bin_img] = generate_skinmap(filepath);
 
 reverseIm = bin_img;
 
@@ -63,20 +65,35 @@ imshow(labeledImage);
 
 stats = regionprops(labeledImage,'Centroid',...
     'MajorAxisLength','MinorAxisLength','Orientation','PixelList','Perimeter');
+filtered_stats = [];
 
-nbRegion = size(stats,1);
+for i=1:size(stats,1)
+    if (stats(i).MajorAxisLength - stats(i).MinorAxisLength) >= 2
+        % filter small iritating elements
+        size(filtered_stats,1)
+        if size(filtered_stats,1)==0
+            filtered_stats = stats(i);
+        else
+            filtered_stats = [filtered_stats; stats(i)];
+        end
+    end
+end
+
+size(filtered_stats,1)
+size(stats,1)
+nbRegion = size(filtered_stats,1);
 eyeRegions=[];
 
 nbEyeRegionPair=0;
 
 for i=1:nbRegion
     for j=i:nbRegion
-        if (i~=j) && (isEyeRegionPair(stats(i), stats(j)))
+        if (i~=j) && (isEyeRegionPair(filtered_stats(i), filtered_stats(j)))
             nbEyeRegionPair = nbEyeRegionPair+1;
             if nbEyeRegionPair == 1
-                eyeRegions = [stats(i),stats(j)];
+                eyeRegions = [filtered_stats(i),filtered_stats(j)];
             else
-                eyeRegions = [eyeRegions,stats(i),stats(j)]; % Consider pre-allocation
+                eyeRegions = [eyeRegions,filtered_stats(i),filtered_stats(j)]; % Consider pre-allocation
             end
         end
     end
@@ -87,4 +104,18 @@ for i=1:nbEyeRegionPair*2
     hold on; % Prevent image from being blown away.
     plot(eyeRegions(i).Centroid(1),eyeRegions(i).Centroid(2),'r+', 'MarkerSize', 5);
 end
-       
+%hold off;
+
+for i=1:nbEyeRegionPair*2
+    mask = createMaskFromPixelList(eyeRegions(i).PixelList, size(raw_img,1), size(raw_img,2));
+    
+    maskedRgbImage = bsxfun(@times, raw_img, cast(mask, 'like', raw_img));
+    imshow(maskedRgbImage);
+    grayed = rgb2gray(maskedRgbImage);
+    imhist(grayed);
+    histogramAnalysis(maskedRgbImage);
+end
+
+
+
+    
