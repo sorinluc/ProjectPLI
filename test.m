@@ -1,4 +1,4 @@
-filepath = 'img/tete5.jpg'
+filepath = 'img/zidane.jpg'
 
 raw_img = imread(filepath);
 img = im2double(raw_img);
@@ -112,10 +112,11 @@ for i=1:nbEyeRegionPair*2
     maskedRgbImage = bsxfun(@times, raw_img, cast(mask, 'like', raw_img));
     imshow(maskedRgbImage);
     grayed = rgb2gray(maskedRgbImage);
-    imhist(grayed);
+    %imhist(grayed);
     histogramAnalysis(maskedRgbImage);
 end
 
+spotEyes(raw_img, eyeRegions);
 
 
     
