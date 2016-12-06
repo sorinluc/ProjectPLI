@@ -61,23 +61,24 @@ end
 labeledImage = bwlabel(reverseIm, 8);
 
 labeledImage(labeledImage<=1) = 0;
-imshow(labeledImage);  
-
-stats = regionprops(labeledImage,'Centroid',...
+imshow(labeledImage);
+SE = strel('disk', 1);
+labeledImage = imopen(labeledImage,SE);
+filtered_stats = regionprops(labeledImage,'Centroid',...
     'MajorAxisLength','MinorAxisLength','Orientation','PixelList','Perimeter');
-filtered_stats = [];
+%filtered_stats = [];
 
-for i=1:size(stats,1)
-    if (stats(i).MajorAxisLength - stats(i).MinorAxisLength) >= 2
-        % filter small iritating elements
-        size(filtered_stats,1)
-        if size(filtered_stats,1)==0
-            filtered_stats = stats(i);
-        else
-            filtered_stats = [filtered_stats; stats(i)];
-        end
-    end
-end
+%for i=1:size(stats,1)
+%    if (stats(i).MajorAxisLength - stats(i).MinorAxisLength) >= 2
+%        % filter small iritating elements
+%        size(filtered_stats,1)
+%        if size(filtered_stats,1)==0
+%            filtered_stats = stats(i);
+%        else
+%            filtered_stats = [filtered_stats; stats(i)];
+%        end
+%    end
+%end
 
 size(filtered_stats,1)
 size(stats,1)
