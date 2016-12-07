@@ -5,13 +5,16 @@
 %% 2016
 
 % Source file path, a single file will be processed each time
-filepath = 'img/groupe.jpg'
+filepath = 'img/tete1.jpg';
 
 % Base image is accessible under "raw_img"
 raw_img = imread(filepath);
 
 % Skin detection, bin_img binary : 0 = skin, 1 is not
-[~,bin_img] = generate_skinmap(filepath);
+[bin_img] = generate_skinmap(raw_img);
+
+subplot(1,2,1), imshow(raw_img);
+subplot(1,2,2), imshow(bin_img);
 
 % Exchanging 1s & 0s of binary image for further processing
 reverseIm = bin_img;
@@ -34,7 +37,7 @@ labeledImage = bwlabel(reverseIm, 8);
 
 % Removing the region corresponding to the sides
 labeledImage(labeledImage<=1) = 0;
-imshow(labeledImage);
+figure,imshow(labeledImage);
 
 % Creating mask for image opening
 SE = strel('disk', 1);
@@ -75,7 +78,7 @@ for i=1:nbEyeRegionPair*2
     mask = createMaskFromPixelList(eyeRegions(i).PixelList, size(raw_img,1), size(raw_img,2));
     
     maskedRgbImage = bsxfun(@times, raw_img, cast(mask, 'like', raw_img));
-    imshow(maskedRgbImage);
+    %imshow(maskedRgbImage);
     grayed = rgb2gray(maskedRgbImage);
     %imhist(grayed);
     histogramAnalysis(maskedRgbImage);

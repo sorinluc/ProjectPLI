@@ -37,5 +37,14 @@ function [ eyeRegionPair ] = isEyeRegionPair( x, y )
         end
     end
     
+    % Verifying that the regions are aligned
+    %atan2(y2-y1,x2-x1)
+    angle = atan2(y_center(2)-x_center(2), y_center(1)-x_center(1));
+    angle = rad2deg(angle);
+    
+    if abs(angle - ((x_theta+y_theta)/2)) > 20
+        eyeRegionPair = 0;
+    end
+    
 end
 

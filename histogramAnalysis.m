@@ -18,11 +18,10 @@ function [ peaks ] = histogramAnalysis( image )
     [counts,~] = imhist(image);
     counts(1) = 0;% Discards the pure black count, created by the mask processing %%TODO think of a more clever approach ?
     nbPixel = sum(counts);
-    minPeakProminence = nbPixel/30 % Min step to consider a peak
-    counts
+    minPeakProminence = nbPixel/30; % Min step to consider a peak
     
     % Finding peak values within the histogram data
-    [peaks,locs] = findpeaks(counts, 'MinPeakProminence', minPeakProminence);
-    peaks
+    [peaks,~] = findpeaks(counts, 'MinPeakProminence', minPeakProminence);
+
 end
 
