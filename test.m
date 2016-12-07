@@ -1,48 +1,19 @@
-filepath = 'img/zidane.jpg'
+%% Lucas Sorin, Emanuella Moura Silva
+%%
+%% Eye detection algorithm for colored images
+%%
+%% 2016
 
+% Source file path, a single file will be processed each time
+filepath = 'img/groupe.jpg'
+
+% Base image is accessible under "raw_img"
 raw_img = imread(filepath);
-img = im2double(raw_img);
-%imshow(img);
-% Do gamma-corretion.
-% TODO.
 
-
-% Convert to TSL.
-%R = img(:, :, 1);
-%G = img(:, :, 2);
-%B = img(:, :, 3);
-
-
-%nr = R./sqrt(R.^2 + G.^2 + B.^2);
-%ng = G./sqrt(R.^2 + G.^2 + B.^2);
-%nb = B./sqrt(R.^2 + G.^2 + B.^2);
-
-
-%fimg = cat(3,nr,ng,nb);
-
-%imshowpair(img, fimg, 'montage');
-
-
-%rows = size(fimg, 1);
-%cols = size(fimg, 2);
-
-
-%cov = [1,0,0;0,1,0;0,0,1];
-%bin_img = zeros(rows, cols);
-
-
-%for i = 1:rows
- %   for j = 1:cols
-  %      c = [fimg(i,j,1), fimg(i,j,2), fimg(i,j,3)];
-   %     lambda_s = c * cov * c';
-    %    if lambda_s <= t
-     %      bin_img(i, j) = 1; 
-      %  end
- %   end
-%end
-
+% Skin detection, bin_img binary : 0 = skin, 1 is not
 [~,bin_img] = generate_skinmap(filepath);
 
+% Exchanging 1s & 0s of binary image for further processing
 reverseIm = bin_img;
 
 rows = size(bin_img, 1);
@@ -58,34 +29,31 @@ for i = 1:rows
     end
 end
 
+% Detection of regions within the binary image, using 8 neighbors
 labeledImage = bwlabel(reverseIm, 8);
 
+% Removing the region corresponding to the sides
 labeledImage(labeledImage<=1) = 0;
 imshow(labeledImage);
+
+% Creating mask for image opening
 SE = strel('disk', 1);
+% Image opening to remove small regions
 labeledImage = imopen(labeledImage,SE);
+
+% Get regions' stats
 filtered_stats = regionprops(labeledImage,'Centroid',...
     'MajorAxisLength','MinorAxisLength','Orientation','PixelList','Perimeter');
-%filtered_stats = [];
 
-%for i=1:size(stats,1)
-%    if (stats(i).MajorAxisLength - stats(i).MinorAxisLength) >= 2
-%        % filter small iritating elements
-%        size(filtered_stats,1)
-%        if size(filtered_stats,1)==0
-%            filtered_stats = stats(i);
-%        else
-%            filtered_stats = [filtered_stats; stats(i)];
-%        end
-%    end
-%end
 
-size(filtered_stats,1)
-size(stats,1)
+size(filtered_stats,1) % DEBUG
+
 nbRegion = size(filtered_stats,1);
 eyeRegions=[];
-
 nbEyeRegionPair=0;
+
+% For each pair of region, we verify that they fullfil the requirements
+% stated in the article. If they do, they are considered eye region
 
 for i=1:nbRegion
     for j=i:nbRegion
@@ -100,13 +68,9 @@ for i=1:nbRegion
     end
 end
 
-imshow(raw_img);
-for i=1:nbEyeRegionPair*2
-    hold on; % Prevent image from being blown away.
-    plot(eyeRegions(i).Centroid(1),eyeRegions(i).Centroid(2),'r+', 'MarkerSize', 5);
-end
-%hold off;
 
+% For each potential eye region, analyse the histogram data
+% This to avoid eyebrows are other parts to be considered eye regions
 for i=1:nbEyeRegionPair*2
     mask = createMaskFromPixelList(eyeRegions(i).PixelList, size(raw_img,1), size(raw_img,2));
     
@@ -117,6 +81,7 @@ for i=1:nbEyeRegionPair*2
     histogramAnalysis(maskedRgbImage);
 end
 
+% Marking eye regions with red spots
 spotEyes(raw_img, eyeRegions);
 
 

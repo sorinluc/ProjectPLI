@@ -1,6 +1,10 @@
 function [ ] = spotEyes( InitialImage, eyeRegions )
-%UNTITLED2 Summary of this function goes here
-%   Detailed explanation goes here
+%spotEyes Marks eye regions with red spots
+
+    if nargin > 2 || nargin < 2
+        error('usage: spotEyes(InitialImage, eyeRegions)');
+    end;
+
     imshow(InitialImage);
     for i=1:size(eyeRegions,2)
         hold on; % Prevent image from being blown away.
